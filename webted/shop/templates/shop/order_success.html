@@ -1,0 +1,114 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>📦 สรุปคำสั่งซื้อ</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .order-container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; color: white; border: none; }
+        .btn-secondary:hover { background: #545b62; }
+    </style>
+</head>
+<body class="container mt-4">
+
+    <!-- ✅ หน้าสรุปคำสั่งซื้อ -->
+    <div class="order-container">
+        <h2 class="text-center">📦 สรุปคำสั่งซื้อ</h2>
+
+        <p><strong>🛒 รายการสินค้าในตะกร้า:</strong></p>
+        <ul>
+            {% for item in items %}
+            <li>{{ item.product.name }} - {{ item.quantity }} กิโลกรัม - {{ item.product.price|floatformat:2 }} บาท</li>
+            {% endfor %}
+        </ul>
+
+        <p><strong>💰 ยอดรวมทั้งหมด:</strong> {{ total_price|floatformat:2 }} บาท</p>
+
+        <!-- ✅ ฟอร์มเลือกวันรับสินค้า -->
+        <form method="post" action="{% url 'confirm_order' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+        <!-- ✅ เลือกวันที่รับสินค้า -->
+        <div class="mb-3">
+            <label for="pickup_date" class="form-label">📆 เลือกวันที่รับสินค้า:</label>
+            <input type="date" id="pickup_date" name="pickup_date" class="form-control" required>
+        </div>
+
+        <!-- ✅ เลือกช่วงเวลารับสินค้า -->
+        <div class="mb-3">
+            <label for="pickup_time" class="form-label">⏰ เลือกช่วงเวลารับสินค้า:</label>
+            <select id="pickup_time" name="pickup_time" class="form-control" required>
+                <option value="">-- กรุณาเลือกช่วงเวลา --</option>
+                <option value="06:00-08:00">06:00 - 08:00 น.</option>
+                <option value="08:00-10:00">08:00 - 10:00 น.</option>
+                <option value="10:00-12:00">10:00 - 12:00 น.</option>
+                <option value="12:00-14:00">12:00 - 14:00 น.</option>
+                <option value="14:00-16:00">14:00 - 16:00 น.</option>
+                <option value="16:00-18:00">16:00 - 18:00 น.</option>
+            </select>
+        </div>
+
+            <!-- ✅ อัปโหลดสลิปโอนเงิน -->
+            <div class="mb-3">
+                <label for="payment_slip" class="form-label">📎 อัปโหลดสลิปโอนเงิน:</label>
+                <input type="file" id="payment_slip" name="payment_slip" class="form-control" accept="image/*" required>
+            </div>
+
+            <!-- ✅ ฟอร์มคอมเมนต์ -->
+            <div class="mb-3">
+                <label for="comment" class="form-label">💬 คอมเมนต์ (ไม่บังคับ):</label>
+                <textarea id="comment" name="comment" class="form-control" rows="4"></textarea>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn btn-primary">✅ ยืนยันคำสั่งซื้อ</button>
+                <a href="{% url 'cart' %}" class="btn btn-secondary">🔙 กลับไปแก้ไข</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const DateTime = luxon.DateTime;
+    const dateInput = document.getElementById("pickup_date");
+
+    // ใช้เวลาไทย (Asia/Bangkok)
+    const today = DateTime.now().setZone("Asia/Bangkok").startOf("day");
+    const max = today.plus({ days: 4 }); // วันนี้ + 4 วัน
+
+    const format = d => d.toFormat("yyyy-MM-dd");
+    dateInput.min = format(today);
+    dateInput.max = format(max);
+  });
+</script>
+
+</body>
+</html>

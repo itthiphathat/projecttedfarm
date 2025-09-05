@@ -1,0 +1,140 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>📜 ประวัติการสั่งซื้อ</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .order-container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .status-rejected {
+            color: red;
+            font-weight: bold;
+        }
+
+        .status-approved {
+            color: green;
+            font-weight: bold;
+        }
+
+        /* ✅ ปุ่มย้อนกลับ */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, #6a11cb, #2575fc); /* ไล่สีม่วง-ฟ้า */
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 10px rgba(37, 117, 252, 0.3);
+            border: none;
+        }
+
+        .btn-back:hover {
+            background: linear-gradient(to right, #2575fc, #6a11cb);
+            transform: scale(1.05);
+            box-shadow: 0px 6px 15px rgba(37, 117, 252, 0.4);
+        }
+
+        .btn-back i {
+            margin-right: 8px;
+        }
+
+    </style>
+</head>
+<body class="container mt-4">
+
+    <div class="order-container">
+        <h2 class="text-center">📜 ประวัติการสั่งซื้อ</h2>
+
+        <!-- ✅ ปุ่มย้อนกลับ -->
+        <a href="{% url 'product_list' %}" class="btn-back">
+            <i>🔙</i> ย้อนกลับ
+        </a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>📅 วันที่รับสินค้า</th>
+                    <th>⏰ เวลารับสินค้า</th>
+                    <th>🛍 รายการสินค้า</th>
+                    <th>💬 คอมเมนต์</th>
+                    <th>💰 ราคาทั้งหมด</th>
+                    <th>📌 สถานะ</th>
+                    <th>📎 สลิป</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.pickup_date }}</td>
+                    <td>{{ order.pickup_time }}</td>
+                    <td>
+                        <ul>
+                            {% for item in order.items.all %}
+                            <li>📦 {{ item.product.name }} ({{ item.quantity }} กิโลกรัม) - {{ item.price|floatformat:2 }} บาท</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>{{ order.comment }}</td>
+                    <td>{{ order.total_price|floatformat:2 }} บาท</td>
+                    <td class="{% if order.status == 'rejected' %}status-rejected{% elif order.status == 'approved' %}status-approved{% endif %}">
+                        {% if order.status == "waiting_confirm" %}
+                            ⏳ รออนุมัติ
+                        {% elif order.status == "approved" %}
+                            ✅ อนุมัติแล้ว
+                        {% elif order.status == "rejected" %}
+                            ❌ ปฏิเสธ
+                        {% elif order.status == "completed" %}
+                            🎉 สำเร็จ
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if order.payment_slip %}
+                            <img src="{{ order.payment_slip.url }}" alt="สลิปการชำระเงิน" width="80px">
+                        {% else %}
+                            ❌ ไม่มีสลิป
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

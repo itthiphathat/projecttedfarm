@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔑 เข้าสู่ระบบ</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* 🎨 พื้นหลังไล่สี */
+        body {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* 🔹 กล่องฟอร์มเข้าสู่ระบบ */
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        /* 🖌️ หัวข้อ */
+        .login-container h2 {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 🛠️ ปรับแต่งปุ่ม */
+        .btn-custom {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s;
+            color: white;
+            box-shadow: 0px 4px 8px rgba(255, 75, 43, 0.3);
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(to right, #ff4b2b, #ff416c);
+            transform: scale(1.05);
+            box-shadow: 0px 6px 12px rgba(255, 75, 43, 0.4);
+        }
+
+        /* 🏠 ปุ่มกลับไปหน้าหลัก */
+        .back-home {
+            display: block;
+            margin-top: 10px;
+            font-size: 14px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .back-home:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 🔐 ฟอร์มเข้าสู่ระบบ -->
+<div class="login-container">
+    <h2>🔑 เข้าสู่ระบบ</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-custom">เข้าสู่ระบบ</button>
+     
+    <p class="mt-3">ยังไม่มีบัญชี? <a href="{% url 'user:register' %}">สมัครสมาชิก</a></p>
+    <a href="{% url 'product_list' %}" class="back-home">🏠 กลับไปหน้าหลัก</a>
+</div>
+
+</body>
+</html>

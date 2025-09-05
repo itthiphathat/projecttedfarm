@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👤 แก้ไขโปรไฟล์</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* 🎨 พื้นหลังแบบ Gradient */
+        body {
+            background: linear-gradient(to right, #36D1DC, #5B86E5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* 🔹 กล่องฟอร์มแก้ไขโปรไฟล์ */
+        .profile-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        /* 🖌️ หัวข้อ */
+        .profile-container h2 {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 🛠️ ปรับแต่งปุ่ม */
+        .btn-custom {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+
+        /* 💾 ปุ่มบันทึก */
+        .btn-save {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+            box-shadow: 0px 4px 8px rgba(255, 75, 43, 0.3);
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(to right, #ff4b2b, #ff416c);
+            transform: scale(1.05);
+            box-shadow: 0px 6px 12px rgba(255, 75, 43, 0.4);
+        }
+
+        /* 🔙 ปุ่มกลับไปหน้าหลัก */
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            transform: scale(1.05);
+        }
+
+        /* 🎨 ปรับแต่ง Form Input */
+        form p {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 👤 ฟอร์มแก้ไขโปรไฟล์ -->
+<div class="profile-container">
+    <h2>👤 แก้ไขโปรไฟล์</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-custom btn-save">💾 บันทึกการเปลี่ยนแปลง</button>
+    </form>
+
+    <!-- ✅ ปุ่มกลับไปหน้าหลัก -->
+    <a href="{% url 'product_list' %}" class="btn btn-custom btn-back mt-3">⬅️ กลับไปหน้าหลัก</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>จัดการผู้ใช้</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-4">
+  <h2>👥 จัดการผู้ใช้</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>ชื่อ</th>
+        <th>เบอร์โทร</th>
+        <th>สถานะ</th>
+        <th>LINE</th>
+        <th>จัดการ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        <tr>
+          <td>{{ user.full_name }}</td>
+          <td>{{ user.phone_number }}</td>
+          <td>{{ user.role }}</td>
+          <td>
+            {% if user.line_user_id %}
+              ✅ เชื่อมแล้ว
+            {% else %}
+              ❌ ยัง
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'user:edit_user' user.id %}" class="btn btn-sm btn-primary">✏️ แก้ไข</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary mt-3">
+    ↩️ กลับหน้าหลักแอดมิน
+  </a>  
+</body>
+</html>

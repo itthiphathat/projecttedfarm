@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>🛍️ รายการสินค้า</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .product-card {
+            border-radius: 10px;
+            transition: 0.3s;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .product-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .best-seller {
+            border: 2px solid red !important;
+            box-shadow: 0px 4px 10px rgba(255, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body class="container mt-4">
+
+    <!-- ✅ Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'product_list' %}">🛍 ร้านค้า</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'product_list' %}">🏠 หน้าหลัก</a></li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'cart' %}">🛒 ตะกร้าสินค้า</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'payment_status' %}">📜 คำสั่งซื้อของฉัน</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'user:edit_profile' %}">✏️ แก้ไขโปรไฟล์</a></li>
+                        <li class="nav-item d-flex align-items-center">
+                        <!-- ✅ ปุ่มแสดงภาพ LINE -->
+                        <li>
+                            <a href="javascript:void(0);" onclick="document.getElementById('lineQRPopup').style.display='block'">
+                            <img src="https://scdn.line-apps.com/n/line_add_friends/btn/th.png" height="40" alt="เพิ่มเพื่อนผ่าน LINE">
+                            </a>
+                        </li>
+                        
+                        <!-- ✅ Popup QR Code -->
+                        <div id="lineQRPopup" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border:1px solid #ccc; border-radius:10px; z-index:9999; text-align:center;">
+                            <h5>📱 สแกน QR เพื่อเพิ่มเพื่อน</h5>
+                            <img src="{% static 'images/M_gainfriends_2dbarcodes_GW.png' %}" alt="LINE QR Code" width="200">
+                            <br><br>
+                            <button onclick="document.getElementById('lineQRPopup').style.display='none'" class="btn btn-sm btn-outline-danger">❌ ปิด</button>
+                        </div>
+  
+                        <li class="nav-item"><a class="nav-link text-danger" href="{% url 'user:logout' %}">🚪 ออกจากระบบ</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'user:login' %}">🔑 เข้าสู่ระบบ</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'user:register' %}">📝 สมัครสมาชิก</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <h1 class="mb-4 text-center">🛍️ รายการสินค้า</h1>
+
+    <!-- Best Sellers -->
+    <h2 class="text-center text-danger">🔥 สินค้าขายดี 🔥</h2>
+    <div class="row">
+        {% for product in products|dictsortreversed:"approved_sales"|slice:":3" %}
+            {% if product.approved_sales > 0 %}
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card h-100 best-seller">
+                        <img src="{{ product.image.url|default:'https://via.placeholder.com/200' }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{{ product.name }}</h5>
+                            <p class="text-muted">💰 <strong>{{ product.price }} บาท</strong></p>
+                            <p>🔥 ขายแล้ว: <span class="fw-bold text-danger">{{ product.sold_quantity }} ชิ้น</span></p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <hr>
+
+
+    <!-- All Products -->
+    <div class="row">
+        {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card product-card h-100">
+                    <img src="{{ product.image.url|default:'https://via.placeholder.com/200' }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ product.name }}</h5>
+                        <p class="text-muted">💰 <strong>{{ product.price }} บาท</strong></p>
+                        <p>📦 คงเหลือ: 
+                            <span class="fw-bold {% if product.quantity == 0 %}text-danger{% else %}text-success{% endif %}">
+                                {{ product.quantity }} กิโลกรัม
+                            </span>
+                        </p>
+                        {% if product.sold_quantity > 0 %}
+                            <p>🔥 ขายแล้ว: <span class="fw-bold text-danger">{{ product.sold_quantity }} ชิ้น</span></p>
+                        {% endif %}
+
+                        {% if user.is_authenticated %}
+                            <form method="post" action="{% url 'add_to_cart' product.id %}">
+                                {% csrf_token %}
+                                <div class="input-group mb-2">
+                                    <input type="number" name="quantity" class="form-control" value="1" min="1">
+                                    <button type="submit" class="btn btn-success">🛒 เพิ่มใส่ตะกร้า</button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'user:register' %}" class="btn btn-outline-primary w-100">🔑 สมัครเพื่อซื้อ</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center text-muted">❌ ไม่พบสินค้า</p>
+        {% endfor %}
+    </div>
+    
+    <!-- ✅ Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

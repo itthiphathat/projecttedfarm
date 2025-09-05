@@ -1,0 +1,63 @@
+{% load static %}
+{% load cart_extras %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ยืนยันการชำระเงิน</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+
+    <!-- ✅ หัวข้อ -->
+    <h1>✅ ยืนยันการชำระเงินสำหรับ Order #{{ order.id }}</h1>
+    <p><strong>📅 วันที่สั่งซื้อ:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+
+    <!-- ✅ แสดงวันที่และเวลาที่มารับ -->
+    {% if order.pickup_date and order.pickup_time %}
+        <h3>🕒 วันที่และเวลารับสินค้า</h3>
+        <p class="border rounded p-2 bg-light">
+            📅 <strong>{{ order.pickup_date|date:"d/m/Y" }}</strong> ⏰ <strong>{{ order.pickup_time }}</strong>
+        </p>
+    {% else %}
+        <p class="text-danger">❌ ยังไม่ได้เลือกวันที่และเวลารับสินค้า</p>
+    {% endif %}
+
+    <!-- ✅ แสดงคอมเมนต์ที่ลูกค้าเขียน -->
+    <h3>💬 ข้อความจากลูกค้า</h3>
+    {% if order.comment %}
+        <p class="border rounded p-2 bg-light">{{ order.comment }}</p>
+    {% else %}
+        <p class="text-muted">❌ ไม่มีข้อความเพิ่มเติมจากลูกค้า</p>
+    {% endif %}
+
+    <!-- ✅ รายการสินค้า -->
+    <h3>📦 รายการสินค้า</h3>
+    <ul class="list-group mb-3">
+        {% for item in order.items.all %}
+            <li class="list-group-item">
+                {{ item.product.name }} ({{ item.quantity }} ชิ้น) - {{ item.price|floatformat:2 }} บาท
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- ✅ ราคารวม -->
+    <h4>💰 ราคารวม: <strong>{{ order.total_price|floatformat:2 }}</strong> บาท</h4>
+
+    <!-- ✅ หลักฐานการชำระเงิน -->
+    {% if order.payment_slip %}
+        <h3>📜 สลิปการโอนเงิน</h3>
+        <img src="{{ order.payment_slip.url }}" alt="Payment Slip" class="img-fluid rounded shadow-sm" width="300">
+    {% else %}
+        <p class="text-danger">❌ ไม่มีหลักฐานการชำระเงิน</p>
+    {% endif %}
+
+    <!-- ✅ ปุ่มยืนยันการชำระเงิน -->
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">✅ อนุมัติการชำระเงิน</button>
+        <a href="{% url 'admin_order_list' %}" class="btn btn-secondary">⬅️ กลับไปยังรายการคำสั่งซื้อ</a>
+    </form>
+
+</body>
+</html>

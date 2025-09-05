@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>📊 สถิติยอดขาย</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap & Chart.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .dashboard-container {
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+    }
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="text-center mb-4">
+      <h3>📊 รายงานยอดขายรวม</h3>
+      <p class="text-muted">แสดงข้อมูลยอดขายที่อนุมัติแล้ว ตามช่วงเวลา</p>
+    </div>
+
+    <div class="row g-3 align-items-center mb-4">
+      <div class="col-md-6">
+        <label for="rangeSelector" class="form-label">เลือกช่วงเวลา:</label>
+        <select id="rangeSelector" class="form-select">
+          <option value="day">รายวัน</option>
+          <option value="week">รายสัปดาห์</option>
+          <option value="month">รายเดือน</option>
+        </select>
+      </div>
+      <div class="col-md-6 text-end">
+        <a href="/admin-dashboard/" class="btn btn-outline-secondary px-4">⬅ กลับ</a>
+      </div>
+    </div>
+
+    <h5 id="totalDisplay" class="text-end text-success">💵 ยอดขายรวมทั้งหมด: - บาท</h5>
+    <canvas id="salesChart" height="100"></canvas>
+  </div>
+
+  <script>
+    const ctx = document.getElementById("salesChart").getContext("2d");
+    let chart;
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("th-TH").format(value);
+    }
+
+    function formatDateThai(dateString) {
+      const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+                      "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+      const [year, month, day] = dateString.split("-");
+      const thaiYear = (parseInt(year) + 543).toString();
+      return `${parseInt(day)} ${months[parseInt(month) - 1]} ${thaiYear}`;
+    }
+
+    function fetchChart(range) {
+      fetch(`/admin-sales-data/?range=${range}`)
+        .then(res => res.json())
+        .then(data => {
+          const rawLabels = data.labels;
+          const labels = rawLabels.map(formatDateThai);
+          const datasets = data.datasets;
+          const total = data.total;
+
+          document.getElementById("totalDisplay").textContent =
+            `💵 ยอดขายรวมทั้งหมด: ${formatCurrency(total)} บาท`;
+
+          document.querySelector("h3").textContent =
+            `📊 รายงานยอดขายรวม (${range === "day" ? "รายวัน" : range === "week" ? "รายสัปดาห์" : "รายเดือน"})`;
+
+          if (chart) chart.destroy();
+
+          chart = new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: labels,
+              datasets: datasets.map(ds => ({
+                ...ds,
+                borderWidth: 2
+              }))
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                  callbacks: {
+                    title: context => rawLabels[context[0].dataIndex],
+                    label: context => `${context.dataset.label}: ${formatCurrency(context.parsed.y)} บาท`
+                  }
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: value => formatCurrency(value)
+                  }
+                }
+              }
+            }
+          });
+        });
+    }
+
+    document.getElementById("rangeSelector").addEventListener("change", () => {
+      fetchChart(document.getElementById("rangeSelector").value);
+    });
+
+    fetchChart("day");
+  </script>
+</body>
+</html>

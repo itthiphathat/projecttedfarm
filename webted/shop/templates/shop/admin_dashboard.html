@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+
+    <!-- Bootstrap & jQuery -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .hidden {
+            display: none;
+        }
+        .product-form {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="text-center p-3 rounded shadow-sm bg-white" style="max-width: 600px; margin: auto;">
+            <h2 class="mb-3">
+                <img src="https://cdn-icons-png.flaticon.com/512/3898/3898108.png" width="30">
+                <strong>Admin Dashboard</strong>
+            </h2>
+
+            <!-- ✅ ปุ่มเมนูหลัก -->
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a href="{% url 'admin_order_list' %}" class="btn btn-warning btn-sm px-3">📦 จัดการคำสั่งซื้อ</a>
+                <a href="{% url 'admin_sales_chart' %}" class="btn btn-info btn-sm px-3">📊 สถิติยอดขาย</a>
+                <a href="{% url 'user:manage_users' %}" class="btn btn-secondary btn-sm px-3">👤 จัดการผู้ใช้</a>
+                <a href="{% url 'user:logout' %}" class="btn btn-danger btn-sm px-3">🚪 Logout</a>
+                <button id="toggleFormBtn" class="btn btn-success btn-sm px-3">➕ เพิ่มสินค้า</button>
+            </div>
+
+            <!-- ✅ ฟอร์มเพิ่มสินค้า (ซ่อนตอนโหลด) -->
+            <div id="add-product-form" class="hidden mt-3">
+                <h2>🛍 เพิ่มสินค้า</h2>
+                <form method="post" enctype="multipart/form-data" class="product-form">
+                    {% csrf_token %}
+                    <div class="mb-3">{{ form.name.label_tag }} {{ form.name }}</div>
+                    <div class="mb-3">{{ form.price.label_tag }} {{ form.price }}</div>
+                    <div class="mb-3">{{ form.quantity.label_tag }} {{ form.quantity }}</div>
+                    <div class="mb-3">{{ form.image.label_tag }} {{ form.image }}</div> 
+                    <button type="submit" class="btn btn-primary">📌 บันทึกสินค้า</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ✅ รายการสินค้า -->
+        <div class="container mt-5">
+            <h2 class="mb-3">📋 จัดการสินค้า</h2>
+            <input type="text" id="searchBox" class="form-control mb-3" placeholder="🔍 ค้นหาสินค้า...">
+            <p id="noResults" class="text-danger text-center" style="display: none;">❌ ไม่พบสินค้าที่ตรงกับคำค้นหา</p>
+
+            <div class="row" id="productGrid">
+                {% for product in products %}
+                <div class="col-md-4 mb-4 product-item">
+                    <div class="card h-100 shadow-sm">
+
+                        <!-- ✅ ดึงรูปจาก product.image โดยตรง -->
+                        <img src="{{ product.image.url|default:'https://via.placeholder.com/200' }}" 
+                            class="card-img-top img-fluid" style="object-fit: cover; max-height: 200px;">
+
+                        <div class="card-body">
+                            <h5 class="card-title text-primary product-name">{{ product.name }}</h5>
+
+                            <p class="card-text">💰 <strong>{{ product.price }} บาท</strong></p>
+
+                            <p>📦 คงเหลือ:
+                                {% if product.quantity > 5 %}
+                                    <span class="text-success">{{ product.quantity }} ชิ้น</span>
+                                {% elif product.quantity > 0 %}
+                                    <span class="text-warning">เหลือ {{ product.quantity }} ชิ้น (ใกล้หมด!)</span>
+                                {% else %}
+                                    <span class="text-danger">❌ หมดสต็อก</span>
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <div class="card-footer text-center">
+                            <a href="{% url 'edit_product' product.id %}" class="btn btn-sm btn-info">✏️ แก้ไข</a>
+                            <a href="{% url 'delete_product' product.id %}" class="btn btn-sm btn-danger"
+                            onclick="return confirm('แน่ใจหรือไม่?');">🗑 ลบ</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- ✅ JavaScript สำหรับ toggle form และค้นหา -->
+        <script>
+            $(document).ready(function () {
+                $("#toggleFormBtn").click(function () {
+                    $("#add-product-form").toggleClass("hidden");
+                });
+
+                $("#searchBox").on("keyup", function () {
+                    var searchText = $(this).val().toLowerCase().trim();
+                    var hasResults = false;
+
+                    $(".product-item").each(function () {
+                        var itemName = $(this).find(".product-name").text().toLowerCase().trim();
+                        if (itemName.includes(searchText)) {
+                            $(this).show();
+                            hasResults = true;
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+
+                    $("#noResults").toggle(!hasResults);
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>

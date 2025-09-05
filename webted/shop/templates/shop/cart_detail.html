@@ -1,0 +1,120 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>🛒 ตะกร้าสินค้า</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .cart-container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .btn-update {
+            background: #ffc107;
+            color: white;
+            border: none;
+            transition: all 0.3s;
+        }
+        .btn-update:hover {
+            background: #e0a800;
+        }
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+            border: none;
+            transition: all 0.3s;
+        }
+        .btn-remove:hover {
+            background: #c82333;
+        }
+        .btn-checkout {
+            background: #28a745;
+            color: white;
+            border: none;
+            transition: all 0.3s;
+        }
+        .btn-checkout:hover {
+            background: #218838;
+        }
+        .btn-secondary {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="container mt-4">
+
+    <!-- ✅ กล่องตะกร้าสินค้า -->
+    <div class="cart-container">
+        <h2 class="text-center">🛒 ตะกร้าสินค้า</h2>
+        
+        {% if items %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped text-center align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>สินค้า</th>
+                            <th>ราคา</th>
+                            <th>จำนวน</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.product.price|floatformat:2 }} บาท</td>
+                             <!-- Update quantity form -->
+                            <td>
+                                <form method="post" action="{% url 'update_cart_item' item.id %}" class="d-flex align-items-center justify-content-center">
+                                    {% csrf_token %}
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control text-center" style="width: 60px;" required>
+                                    <button type="submit" class="btn btn-update btn-sm ms-2">🔄</button>
+                                </form>
+                            </td>
+                            <!-- Remove item form -->
+                            <td>
+                                <form method="post" action="{% url 'remove_from_cart' item.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-remove btn-sm">🗑️</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="table-warning">
+                            <td colspan="3"><strong>รวมทั้งหมด:</strong></td>
+                            <td><strong>{{ total|floatformat:2 }} บาท</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        
+            <!-- ✅ เปลี่ยนปุ่มให้ไปที่หน้าสรุปคำสั่งซื้อ -->
+            <div class="d-flex justify-content-center mt-3">
+                <a href="{% url 'order_success' %}" class="btn btn-checkout">✅ ไปที่หน้าสรุปคำสั่งซื้อ</a>
+            </div>
+        {% else %}
+            <p class="alert alert-warning text-center">⚠️ ตะกร้าของคุณว่างเปล่า</p>
+        {% endif %}
+
+        <!-- 🔙 ปุ่มกลับไปซื้อสินค้า -->
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">🔙 กลับไปซื้อสินค้า</a>
+    </div>
+
+</body>
+</html>
